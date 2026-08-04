@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="head">
+    <h1 class="mark">Dark<span>Veil</span></h1>
+    <p class="site" id="site" title="">—</p>
+    <div class="lang" id="lang" role="radiogroup" aria-label="Language"></div>
+  </header>
+
+  <button class="dimmer" id="siteToggle" type="button" aria-pressed="false">
+    <span class="dimmer__fill"></span>
+    <span class="dimmer__label">
+      <span class="dimmer__state" id="siteState"></span>
+      <span class="dimmer__hint" data-i18n="dimmer.hint"></span>
+    </span>
+  </button>
+
+  <div class="scope">
+    <div class="seg" id="scopeSeg" role="radiogroup">
+      <button type="button" class="seg__btn" data-scope="site" role="radio" aria-checked="true" data-i18n="scope.site"></button>
+      <button type="button" class="seg__btn" data-scope="global" role="radio" aria-checked="false" data-i18n="scope.global"></button>
+    </div>
+    <span class="badge" id="badge" data-i18n="badge.custom" hidden></span>
+  </div>
+
+  <div class="panel" id="panel">
+    <section class="row row--seg">
+      <span class="lbl" data-i18n="label.method"></span>
+      <div class="seg" id="modeSeg" role="radiogroup">
+        <button type="button" class="seg__btn" data-mode="filter" role="radio" aria-checked="true" data-i18n="mode.filter"></button>
+        <button type="button" class="seg__btn" data-mode="overlay" role="radio" aria-checked="false" data-i18n="mode.overlay"></button>
+      </div>
+    </section>
+
+    <section class="sliders" id="sliders">
+      <label class="row row--slider">
+        <span class="lbl" data-i18n="label.brightness"></span>
+        <input type="range" id="brightness" min="50" max="150" step="1">
+        <output id="brightnessOut">100</output>
+      </label>
+      <label class="row row--slider">
+        <span class="lbl" data-i18n="label.contrast"></span>
+        <input type="range" id="contrast" min="50" max="150" step="1">
+        <output id="contrastOut">95</output>
+      </label>
+      <label class="row row--slider">
+        <span class="lbl" data-i18n="label.warmth"></span>
+        <input type="range" id="sepia" min="0" max="60" step="1">
+        <output id="sepiaOut">0</output>
+      </label>
+    </section>
+
+    <section class="checks">
+      <label class="check" id="wrapPreserveMedia">
+        <input type="checkbox" id="preserveMedia">
+        <span data-i18n="check.preserveMedia"></span>
+      </label>
+      <label class="check" id="wrapHandleBgImages">
+        <input type="checkbox" id="handleBgImages">
+        <span data-i18n="check.handleBgImages"></span>
+      </label>
+      <label class="check" id="wrapSkipDarkSites">
+        <input type="checkbox" id="skipDarkSites">
+        <span data-i18n="check.skipDarkSites"></span>
+      </label>
+      <label class="check" id="wrapEnabled">
+        <input type="checkbox" id="enabled">
+        <span data-i18n="check.enabled"></span>
+      </label>
+    </section>
+
+    <button type="button" id="clearSite" class="link link--block" data-i18n="clearSite" hidden></button>
+  </div>
+
+  <button type="button" id="supportToggle" class="cta" hidden>
+    <svg class="cta__icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 20.5 4.2 12.9a4.7 4.7 0 0 1 0-6.7 4.8 4.8 0 0 1 6.8 0l1 1 1-1a4.8 4.8 0 0 1 6.8 0 4.7 4.7 0 0 1 0 6.7Z"/>
+    </svg>
+    <span id="supportLabel"></span>
+  </button>
+
+  <section class="support" id="support" hidden>
+    <p class="support__note" data-i18n="support.note"></p>
+    <div id="supportItems"></div>
+  </section>
+
+  <footer class="foot">
+    <span class="ver" id="ver"></span>
+    <span class="keys"><kbd>Alt</kbd><kbd>&#8679;</kbd><kbd>D</kbd></span>
+  </footer>
+
+  <script src="../src/config.js"></script>
+  <script src="../src/i18n.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

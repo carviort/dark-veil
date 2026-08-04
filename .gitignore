@@ -1,0 +1,13 @@
+# Paquetes generados para la tienda
+*.zip
+dist/
+
+# Basura del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
