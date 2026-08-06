@@ -3,17 +3,20 @@
 [Descargar la última versión](https://github.com/carviort/dark-veil/releases/latest)
 # Dark Veil
 
+[![Release](https://img.shields.io/github/v/release/carviort/dark-veil)](https://github.com/carviort/dark-veil/releases/latest)
+
 Modo oscuro para cualquier sitio web. Manifest V3.
 
-**Política de privacidad:** https://carviort.github.io/dark-veil/privacy-policy.html
+Política de privacidad: https://carviort.github.io/dark-veil/privacy-policy.html
 
 ## Empaquetar para la tienda
 
-```bash
-./build.sh
+```
+./build.sh      # Linux / macOS
+.\build.ps1     # Windows
 ```
 
-Lee la versión del `manifest.json` y deja el zip en `dist/`, con el
+Ambos leen la versión del `manifest.json` y dejan el zip en `dist/`, con el
 `manifest.json` en la raíz del archivo, que es como lo exige el panel.
 
 ## Instalar
@@ -23,7 +26,18 @@ Lee la versión del `manifest.json` y deja el zip en `dist/`, con el
 3. **Cargar descomprimida** → selecciona la carpeta `dark-veil`
 4. Ancla el icono a la barra y ábrelo en cualquier página
 
-Atajo: `Alt` + `Shift` + `D` enciende o apaga el sitio actual.
+Al instalarse no oscurece nada: cada sitio arranca apagado. Pulsa el botón
+grande del popup para encender el sitio actual.
+
+Atajo: `Alt + Shift + D` enciende o apaga el sitio actual.
+
+## Permisos
+
+- `storage` — guarda tus ajustes en local. No se envía nada a ningún servidor.
+- `scripting` — se usa una sola vez, al instalar, para aplicar la extensión en
+  las pestañas que ya tenías abiertas sin obligarte a recargarlas.
+- `<all_urls>` — el modo oscuro tiene que poder actuar en cualquier página. La
+  extensión no lee ni transmite el contenido de los sitios que visitas.
 
 ## Los dos métodos
 
@@ -39,7 +53,7 @@ html { filter: invert(1) hue-rotate(180deg) brightness(B) contrast(C); }
 (sin él, el azul se vuelve naranja y todo parece de los 90).
 
 El truco está en las fotos: si solo inviertes, las caras salen radiactivas. Así
-que cada `img`, `video`, `canvas`... lleva el filtro **inverso exacto**, en orden
+que cada `img`, `video`, `canvas`... lleva el filtro inverso exacto, en orden
 inverso:
 
 ```css
@@ -47,18 +61,18 @@ img, video, ... { filter: contrast(1/C) brightness(1/B) hue-rotate(180deg) inver
 ```
 
 Los filtros se componen: primero el del hijo, después el del padre. Como
-`invert ∘ invert = identidad` y `hue-rotate(180) ∘ hue-rotate(180) = 360 = identidad`,
-y brillo/contraste se cancelan con sus recíprocos, la imagen vuelve **exactamente**
-a su color original mientras el resto de la página queda oscura.
+invert ∘ invert = identidad y hue-rotate(180) ∘ hue-rotate(180) = 360 =
+identidad, y brillo/contraste se cancelan con sus recíprocos, la imagen vuelve
+exactamente a su color original mientras el resto de la página queda oscura.
 
-**Iframes.** El script corre en todos los marcos pero solo el principal aplica el
-filtro a `html`: el navegador pinta los iframes dentro del marco padre, así que
-ya quedan invertidos. Dentro de cada iframe, el script solo contra-invierte sus
-imágenes y vídeos. Resultado: una única inversión, sin dobles.
+**Iframes.** El script corre en todos los marcos pero solo el principal aplica
+el filtro a `html`: el navegador pinta los iframes dentro del marco padre, así
+que ya quedan invertidos. Dentro de cada iframe, el script solo contra-invierte
+sus imágenes y vídeos. Resultado: una única inversión, sin dobles.
 
-### Capa (`mix-blend-mode`)
+### Capa (mix-blend-mode)
 
-Un `div` fijo a pantalla completa:
+Un div fijo a pantalla completa:
 
 ```css
 position: fixed; inset: 0; background: #fff; mix-blend-mode: difference;
@@ -77,45 +91,46 @@ lleve mal con un sitio concreto.
   contenedor de sus descendientes fijos. En Chrome el caso de `:root` está
   bastante bien resuelto, pero algunos sitios con cabeceras pegajosas raras se
   descolocan. Ahí, cambia a modo Capa o apaga ese dominio.
-- **Fondos con imagen en CSS.** No se distinguen del color de fondo sin inspeccionar
-  los estilos computados. La opción *Corregir fondos con imagen* recorre el DOM y
-  marca los elementos con `background-image` **que no contienen texto propio**
-  (si lo tuvieran, el texto se invertiría al revés). Va desactivada por defecto
-  porque cuesta CPU en páginas enormes.
+- **Fondos con imagen en CSS.** No se distinguen del color de fondo sin
+  inspeccionar los estilos computados. La opción *Corregir fondos con imagen*
+  recorre el DOM y marca los elementos con `background-image` que no contienen
+  texto propio (si lo tuvieran, el texto se invertiría al revés). Va desactivada
+  por defecto porque cuesta CPU en páginas enormes.
 - **PDFs y `<embed>`.** El visor de PDF de Chrome no admite content scripts.
-- **Vídeo a pantalla completa.** Sale con el color correcto, que es lo que quieres.
+- **Vídeo a pantalla completa.** Sale con el color correcto, que es lo que
+  quieres.
 - **Sitios ya oscuros.** Se detectan midiendo la luminancia del fondo de `body`
   al cargar y se saltan. Si un sitio se salta y no debería, enciéndelo a mano:
   la elección manual gana sobre la detección.
 
 ## Si quieres ir más lejos
 
-Esta extensión invierte. La alternativa seria es **re-tematizar**: leer las hojas
-de estilo, encontrar cada color declarado, convertirlo a HSL y darle la vuelta
-solo a la luminosidad, conservando tono y saturación. Sale mucho mejor —es lo que
+Esta extensión invierte. La alternativa seria es re-tematizar: leer las hojas de
+estilo, encontrar cada color declarado, convertirlo a HSL y darle la vuelta solo
+a la luminosidad, conservando tono y saturación. Sale mucho mejor —es lo que
 hace Dark Reader— pero implica parsear CSSOM, seguir `@import`, manejar hojas
 cross-origin y observar los estilos que se inyectan en caliente. Es un orden de
 magnitud más de trabajo.
 
 Otra mejora concreta: registrar el CSS con
-`chrome.scripting.registerContentScripts()` al arrancar el service worker, en vez
-de inyectarlo desde el content script. El navegador lo aplica antes del primer
-pintado y desaparece el fogonazo blanco al cargar.
+`chrome.scripting.registerContentScripts()` al arrancar el service worker, en
+vez de inyectarlo desde el content script. El navegador lo aplica antes del
+primer pintado y desaparece el fogonazo blanco al cargar.
 
 ## Ajustes por sitio
 
-Cada dominio guarda su propia configuración completa, no solo si está encendido.
-Puedes tener Wikipedia en modo Filtro con el contraste al 90 y otro sitio que se
-lleva mal con los filtros en modo Capa, a la vez.
+Cada dominio guarda su propia configuración completa, no solo si está
+encendido. Puedes tener Wikipedia en modo Filtro con el contraste al 90 y otro
+sitio que se lleva mal con los filtros en modo Capa, a la vez.
 
 En el popup, el selector **Este sitio / Por defecto** decide qué estás editando:
 
 - **Este sitio** — los cambios afectan solo al dominio actual. Aparece la
-  etiqueta `propio` cuando ese sitio tiene algo distinto de lo general, y con
+  etiqueta *propio* cuando ese sitio tiene algo distinto de lo general, y con
   *Volver a los valores por defecto aquí* se borran sus ajustes propios sin
   perder el encendido/apagado.
-- **Por defecto** — los cambios afectan a todos los sitios que no tengan ajustes
-  propios.
+- **Por defecto** — los cambios afectan a todos los sitios que no tengan
+  ajustes propios.
 
 Por dentro:
 
@@ -133,12 +148,13 @@ contraste general, los sitios que no lo hayan tocado lo heredan.
 
 ## Idioma
 
-La interfaz está en **inglés por defecto** y trae un selector EN/ES en la
-esquina superior derecha del popup. La elección se guarda y persiste.
+La interfaz está en inglés por defecto y trae un selector EN/ES en la esquina
+superior derecha del popup. La elección se guarda y persiste.
 
 Los textos viven en `src/i18n.js`. Para añadir un idioma: copia el bloque `es`,
 cámbiale la clave, traduce los valores y añade el código a `DV_LANGS`. El
-selector se genera solo a partir de ese array, así que no hay que tocar nada más.
+selector se genera solo a partir de ese array, así que no hay que tocar nada
+más.
 
 Los campos de `src/config.js` admiten cadena suelta u objeto por idioma:
 
@@ -152,11 +168,13 @@ warning: { en: 'BEP20 only', es: 'Solo BEP20' }
 ```
 dark-veil/
 ├── manifest.json
+├── build.sh            ← empaquetado en Linux / macOS
+├── build.ps1           ← empaquetado en Windows
 ├── src/
 │   ├── config.js       ← valores por defecto y enlaces de donación
 │   ├── i18n.js         ← textos de la interfaz
 │   ├── content.js      la lógica de verdad
-│   └── background.js   migración de datos y atajo de teclado
+│   └── background.js   migración, atajo de teclado e inyección al instalar
 ├── popup/
 │   ├── popup.html
 │   ├── popup.css
