@@ -1,6 +1,3 @@
-[![Release](https://img.shields.io/github/v/release/carviort/dark-veil)](https://github.com/carviort/dark-veil/releases/latest)
-
-[Descargar la última versión](https://github.com/carviort/dark-veil/releases/latest)
 # Dark Veil
 
 [![Release](https://img.shields.io/github/v/release/carviort/dark-veil)](https://github.com/carviort/dark-veil/releases/latest)
@@ -20,6 +17,8 @@ Ambos leen la versión del `manifest.json` y dejan el zip en `dist/`, con el
 `manifest.json` en la raíz del archivo, que es como lo exige el panel.
 
 ## Instalar
+
+[Descargar la última versión](https://github.com/carviort/dark-veil/releases/latest)
 
 1. Abre `chrome://extensions`
 2. Activa **Modo de desarrollador** (arriba a la derecha)
