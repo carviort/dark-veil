@@ -1,3 +1,5 @@
+[![Release](https://img.shields.io/github/v/release/carviort/dark-veil)](https://github.com/carviort/dark-veil/releases/latest)
+
 # Dark Veil
 
 Modo oscuro para cualquier sitio web. Manifest V3.
