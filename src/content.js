@@ -33,7 +33,19 @@
   const OVERLAY_ID = 'darkveil-overlay';
   const BG_CLASS = 'darkveil-bg';
 
-  const host = location.hostname || '';
+  /* Un iframe debe usar el dominio de la página que lo contiene, no el suyo.
+     Si no, un reproductor incrustado desde otro dominio resuelve su propia
+     configuración (y con enabled:false por defecto, no contra-invierte nada).
+     ancestorOrigins funciona aunque el marco sea de otro origen. */
+  const host = (() => {
+    if (IS_TOP) return location.hostname || '';
+    try {
+      const a = location.ancestorOrigins;
+      if (a && a.length) return new URL(a[a.length - 1]).hostname;
+    } catch (_) {}
+    try { return window.top.location.hostname; } catch (_) {}
+    return location.hostname || '';
+  })();
 
   let store = { defaults: {}, sites: {} };
   let cfg = { ...DV_DEFAULTS };
@@ -42,6 +54,11 @@
 
   function root() { return document.documentElement; }
 
+  /* Solo elementos que SON un medio. Los fondos con imagen en CSS no entran
+     aquí: un div con background-image suele llevar texto dentro, y contra-
+     invertirlo entero devuelve ese bloque a colores claros. Ese caso lo trata
+     la opción handleBgImages, que en JS comprueba que el elemento no tenga
+     texto propio antes de marcarlo con BG_CLASS. */
   const MEDIA = [
     'img',
     'video',
@@ -49,7 +66,6 @@
     'canvas',
     'svg[data-darkveil-keep]',
     'input[type="image"]',
-    '[style*="background-image"]',
     '.' + BG_CLASS
   ].join(',');
 
@@ -82,9 +98,13 @@ html, body { background-color: #ffffff !important; }
     }
 
     if (c.preserveMedia) {
+      /* Ojo: MEDIA es una lista separada por comas. Sin envolverla en :is(),
+         el combinador descendente solo afecta al primer selector y el resto
+         quedan sueltos, anulando el filtro en toda la página. */
       css += `
 ${MEDIA} { filter: ${child} !important; }
-.${BG_CLASS} ${MEDIA} { filter: none !important; }
+:is(${MEDIA}) :is(${MEDIA}) { filter: none !important; }
+.${BG_CLASS} :is(${MEDIA}) { filter: none !important; }
 `;
     }
 
