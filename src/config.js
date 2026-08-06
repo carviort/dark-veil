@@ -6,7 +6,7 @@
 
 /* Valores con los que se comporta un sitio que no tiene ajustes propios. */
 const DV_DEFAULTS = {
-  enabled: true,         // ¿activo al entrar por primera vez en un sitio nuevo?
+  enabled: false,        // ¿activo al entrar por primera vez en un sitio nuevo?
   mode: 'filter',        // 'filter' | 'overlay'
   brightness: 100,       // 50–150
   contrast: 95,          // 50–150

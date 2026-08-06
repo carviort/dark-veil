@@ -28,7 +28,35 @@ async function migrate() {
   if (touched) await chrome.storage.local.set({ sites });
 }
 
-chrome.runtime.onInstalled.addListener(migrate);
+/* Chrome no inyecta los content scripts en las pestañas que ya estaban
+ * abiertas en el momento de instalar. Sin esto, quien instala la extensión
+ * no ve ningún cambio hasta que recarga cada pestaña a mano.
+ */
+const DV_FILES = ['src/config.js', 'src/content.js'];
+
+async function injectExisting() {
+  let tabs;
+  try { tabs = await chrome.tabs.query({}); } catch (_) { return; }
+
+  for (const tab of tabs) {
+    if (!tab.id || !tab.url) continue;
+    if (!/^https?:/i.test(tab.url)) continue;   // chrome://, Web Store, PDF...
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id, allFrames: true },
+        files: DV_FILES
+      });
+    } catch (_) { /* pestaña protegida o cerrada mientras tanto: se ignora */ }
+  }
+}
+
+chrome.runtime.onInstalled.addListener(async details => {
+  await migrate();
+  // Solo en 'install': al actualizar, config.js ya está declarado en el
+  // contexto de las pestañas vivas y reinyectarlo daría error de redeclaración.
+  if (details.reason === 'install') await injectExisting();
+});
+
 chrome.runtime.onStartup.addListener(migrate);
 
 chrome.commands.onCommand.addListener(async command => {

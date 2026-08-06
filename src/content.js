@@ -19,6 +19,12 @@
 (() => {
   'use strict';
 
+  /* Al instalar, background.js reinyecta el script en las pestañas ya
+     abiertas. Si por lo que sea coincide con la inyección declarativa,
+     este guardia evita listeners duplicados. */
+  if (window.__darkVeilLoaded) return;
+  window.__darkVeilLoaded = true;
+
   const IS_TOP = (() => {
     try { return window.top === window.self; } catch (_) { return false; }
   })();
@@ -86,6 +92,12 @@ ${MEDIA} { filter: ${child} !important; }
   }
 
   function applyStyle(c) {
+    const css = buildCSS(c);
+
+    /* En subframes el CSS queda vacío si no hay que contra-invertir medios.
+       Sin esto, cada iframe de anuncio se quedaba con un <style> inútil. */
+    if (!css) { removeStyle(); return; }
+
     let el = document.getElementById(STYLE_ID);
     if (!el) {
       el = document.createElement('style');
@@ -93,7 +105,7 @@ ${MEDIA} { filter: ${child} !important; }
       el.type = 'text/css';
       (document.head || root()).appendChild(el);
     }
-    el.textContent = buildCSS(c);
+    el.textContent = css;
     if (el.parentNode && el.parentNode.lastElementChild !== el) {
       el.parentNode.appendChild(el);
     }
@@ -237,8 +249,18 @@ ${MEDIA} { filter: ${child} !important; }
 
   // ------------------------------------------------------- arranque
 
+  /* Un subframe solo necesita saber de su propio dominio. Guardar el mapa
+     completo multiplicaba ese objeto por cada iframe de cada pestaña, y ese
+     mapa crece indefinidamente con los sitios que el usuario va visitando. */
+  function trimStore() {
+    if (IS_TOP) return;
+    const own = store.sites[host];
+    store.sites = own === undefined ? {} : { [host]: own };
+  }
+
   chrome.storage.local.get(['defaults', 'sites'], data => {
     store = { defaults: data.defaults || {}, sites: data.sites || {} };
+    trimStore();
     refresh();
 
     if (document.readyState === 'loading') {
@@ -254,7 +276,7 @@ ${MEDIA} { filter: ${child} !important; }
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
     if (changes.defaults) store.defaults = changes.defaults.newValue || {};
-    if (changes.sites) store.sites = changes.sites.newValue || {};
+    if (changes.sites) { store.sites = changes.sites.newValue || {}; trimStore(); }
     refresh();
     checkDarkSite();
   });
